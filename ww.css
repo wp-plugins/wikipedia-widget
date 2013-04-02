@@ -1,0 +1,25 @@
+.widget_wikipedia_widget form input[type=submit] {
+	display: none;
+}
+.widget_wikipedia_widget form input[type=text] {
+	width: 80%;
+	margin-bottom: 15px;
+	float: left;
+}
+.widget_wikipedia_widget .wikipedia_widget-loader img {
+	border: 0px;
+	box-shadow: none;
+	float: left;
+}
+.wikipedia_widget-result {
+	clear: both;
+}
+.widget_wikipedia_widget ul li {
+	list-style-type: none;
+	margin-bottom: 5px;
+}
+.widget_wikipedia_widget ul li img {
+	float: right;
+	margin: 5px;
+	box-shadow: rgba(0, 0, 0, 0.196) 0px 1px 4px 0px
+}

@@ -40,6 +40,9 @@ class Wikipedia_Widget extends WP_Widget {
 		if ( is_single() ) {
 			global $post;
 			$search_term = get_the_title($post);
+			// Take only the words before the first special character to find more on wikipedia
+ 			$search_term = trim(preg_replace("#[,|;|-|.|!|?|(].*#","",$search_term));
+
 		}
 		if ( $search_term ) {
 			$form_header .= '<input class="' . $this->id_base . '-search_now" value="' . $search_term . '" type="hidden" />';

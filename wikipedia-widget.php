@@ -13,15 +13,17 @@ include_once dirname( __FILE__ ) . "/widget.php";
 add_action( 'widgets_init', create_function( '', 'register_widget( "wikipedia_widget" );' ) );
 
 // register javascripts and css
-add_action('init', 'ww_init');
-function ww_init() {
-	/* TODO: onhly on widget page and content-page if widgetist active */
-	wp_enqueue_script('jquery');
+add_action('wp_enqueue_scripts', 'ww_initScripts');
+function ww_initScripts() {
+	?><script type="text/javascript">
+	var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
+	</script><?php
+	//wp_enqueue_script('jquery');
 	wp_register_script( 'ww.js', plugins_url("/ww.js" , __FILE__ ), array('jquery') );
 	wp_enqueue_script( 'ww.js' );
 
 	wp_register_style( 'ww.css', plugins_url("/ww.css" , __FILE__ ), array() );
-	wp_enqueue_style( 'ww.css');
+	wp_enqueue_style( 'ww.css');	
 }
 
 /**
@@ -41,14 +43,14 @@ function ww_result_print( $result ) {
 		if(isset($value->Image[0]['source'])){
 			echo "<img src='" . $value->Image[0]['source'] . "' />";
 		}
-		echo "<a href='" . $value->Url . "'>" . $value->Text . "</a> | " . $value->Description . "</li>";
+		echo "<a href='" . $value->Url . "' target='_blank'>" . $value->Text . "</a> | " . $value->Description . "</li>";
 	}
 	echo "</ul>";
 }
 
 //add ajax action
-add_action('wp_ajax_nopriv_ww_request', 'ww_wikipedia_request');
 add_action('wp_ajax_ww_request', 'ww_wikipedia_request');
+add_action('wp_ajax_nopriv_ww_request', 'ww_wikipedia_request');
 
 /**
  *	Do wikipedia-API request for ajax-call

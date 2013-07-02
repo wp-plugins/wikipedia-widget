@@ -3,7 +3,8 @@ jQuery(document).ready(function($) {
 	var options = wikipedia_widget_script;
 	var ajaxurl = options['ajaxurl'];
 
-	jQuery.wikipedia_call = function(search_term) {
+	jQuery.wikipedia_call = function(search_term) {		
+		if (search_term == "") return;
 		var thisData = {
 				action: 'wikipedia_request',				
 				search: search_term,
@@ -43,7 +44,7 @@ jQuery(document).ready(function($) {
 	jQuery.each(search_fields, function(i, value) {
 		var search_term = Array();
 		jQuery(value).keyup(function() {
-			if ( search_term[i] != jQuery.trim(jQuery(value).val()) ) {				
+			if ( search_term[i] != jQuery.trim(jQuery(value).val())) {
 				search_term[i] = jQuery.trim(jQuery(value).val());
 				jQuery(search_fields[0]).val( search_term[i] );
 				if ( search_term[i].length > 2 ) {

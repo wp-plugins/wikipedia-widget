@@ -3,7 +3,7 @@ Contributors: asimeon, triechert
 Tags: wikipedia, widget, sidebar, search, knowledge
 Requires at least: 3.1
 Tested up to: 3.5
-Stable tag: 0.13.04
+Stable tag: 0.13.07
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,7 +17,7 @@ Main Features:
 
 * Define a default search string or get the current post title
 * Show or hide the search form or define an alternative search form within the page
-* Use cache for the default search term for better speed 
+* Use cache for the search results for better speed 
 * Results are clear formatted, with links and pictures
 
 == Installation ==
@@ -35,6 +35,13 @@ No Questions have been asked yet.
 2. Front-end display search results and input
 
 == Changelog ==
+
+= 0.13.07 =
+* fixed too long transient-names
+
+= 0.13.05 =
+* add cache for every search result
+* remove search trim
 
 = 0.13.04 =
 

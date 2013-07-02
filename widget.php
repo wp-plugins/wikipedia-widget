@@ -41,15 +41,16 @@ class Wikipedia_Widget extends WP_Widget {
 
 		if ( is_single() ) {
 			global $post;
-			$search_term = ( $instance['search_term'] = trim(preg_replace("#[,|;|-|.|!|?|(].*#","", get_the_title($post) )) );
+			//$search_term = ( $instance['search_term'] = trim(preg_replace("#[,|;|-|.|!|?|(].*#","", get_the_title($post) )) );
+			$search_term = ( $instance['search_term'] = get_the_title($post) );
 		}
 		echo $before_widget;
 		echo ! empty( $title ) ? $before_title . $title . $after_title : ''; ?>
 
-		<form action="" method="" class="<?php echo $this->id_base; ?>-search_form">
+		<form action="" method="GET" class="<?php echo $this->id_base; ?>-search_form">
 			<?php 
 			echo $search_form == 'on' ? '<input class="' . $this->id_base . '-search" type="text" placeholder="' . __('Search') . '" />' : ''; 
-			echo $search_term ? '<input type="text" class="' . $this->id_base . '-default_search" value="' . $search_term . '" hidden />' : ''; ?>
+			echo $search_term ? '<input type="hidden" class="' . $this->id_base . '-default_search" value="' . $search_term . '" />' : ''; ?>
 			<div class="<?php echo $this->id_base; ?>-loader" style="display:none"><img src="<?php echo plugins_url('/loader.gif' , __FILE__ ); ?>" /></div>
 			<input type="submit" value="Los" />
 		</form>
@@ -124,15 +125,13 @@ class Wikipedia_Widget extends WP_Widget {
 	 *
 	 * @return string search-results as html-list
 	 */
-	public function format_search_results( $data ) {		
+	public function output_search_results( $data ) {
 		$xml_result = simplexml_load_string($data);
-		$result = ! $xml_result->Section->Item ? sprintf( __('<li>No results. <a href="https://wikipedia.org/wiki/Special:Search?search=%s&go=Go" target="_blank">Try manually</a>.</li>'), urlencode($xml_result->Query) ) : "";
-		foreach($xml_result->Section->Item as $data => $value) {	
-			$result .= "<li>";
-			$result .= ! isset($value->Image[0]['source']) ? '' : "<img src='" . $value->Image[0]['source'] . "' />";
-			$result .= "<a href='" . $value->Url . "' target='_blank'>" . $value->Text . "</a> | " . $value->Description . "</li>";
+		$result = ($xml_result->query->searchinfo->attributes()->totalhits == 0) ? '<li>No results': '';
+		foreach($xml_result->query->search->p as $item) {	
+			$result .= "<p><a href='http://en.wikipedia.org/wiki/" . $item->attributes()->title . "' target='_blank'>" . $item->attributes()->title . "</a> | " . $item->attributes()->snippet . "</p>";
 		}
-		return "<ul>" . $result . "</ul>";
+		return $result;		
 	}
 
 	/**
@@ -144,9 +143,9 @@ class Wikipedia_Widget extends WP_Widget {
 	 *
 	 * @return string search-results
 	 */
-	public function wikipedia_search_request($url, $search, $limit) {		
+	public function http_post_request($url, $search, $limit) {		
 		global $wp_version;
-		$data = array('format' => 'xml', 'action' => 'opensearch', 'search' => $search, 'limit' => $limit, 'namespace' => '0');
+		$data = array('format' => 'xml', 'action' => 'query', 'list' => 'search', 'srsearch' => 'intitle:' . $search, 'srprop' => 'snippet', 'srredirects' => '', 'srlimit' => $limit);
 		$url = parse_url( $url . 'w/api.php' );
 	    $host = $url['host'];
 	    $path = $url['path'];
@@ -168,7 +167,7 @@ class Wikipedia_Widget extends WP_Widget {
 			if ( is_wp_error( $response ) ) {
 				return sprintf( __('<p class="ww_error">Error while fetching search results: %s</p>'), $response->get_error_message() );
 			} else {
-				return $this->format_search_results($response['body']);
+				return $this->output_search_results($response['body']);
 			}
 		} else {
 			return sprintf("<p class='ww_error'>Didn't find function wp_remote_post(). Are you using Wordpress < 2.1 ?).</p>");
@@ -176,23 +175,29 @@ class Wikipedia_Widget extends WP_Widget {
 	}
 
 	/**
-	 * Call and echo search request. either from wikipedia or from cache if exists.
-	 * For the default search the cache will be created if not exist.
+	 * Return search request from http_post_request() or cache. Creates cached searche if not exist
+	 */
+	public function prepare_search_request($url, $search, $limit) {
+		$transient_name = 'ww_cache_' . substr( urlencode($search), 0, 35);
+		if ( false === ( $content = get_transient( $transient_name ) ) ) {
+		    $content = $this->http_post_request( $url, $search, $limit );
+		    $transient_time = 60 * 60 * 24 * 30;  // 30 days
+		    set_transient( $transient_name, $content, $transient_time );
+		}
+		return $content;
+	}
+
+
+	/**
+	 * Call and echo search request from ajax
 	 */
 	public function ajax_wikipedia_search_request() {
 		extract( $_POST );
 		if ( empty($url) || empty($search) || empty($limit) ) {
 			return sprintf("<p class='ww_error'>Error while getting POST-Parameters.</p>");
 		}
-		$default_search_term = array_shift(get_option('widget_wikipedia_widget'));		
-		$content = ($search == $default_search_term['search_term']) ? html_entity_decode( get_transient( 'widget_wikipedia_widget_cache' ) ) : $this->wikipedia_search_request( $url, $search, $limit );
-		if ( empty($content) ) { //perform default search-cache
-			$re_check_time = 7 * 24 * 60 * 60;  // 1 week		
-			$content = $this->wikipedia_search_request( $url, $search, $limit );
-			set_transient( 'widget_wikipedia_widget_cache', htmlentities($content), $re_check_time );
-		}
-		echo $content;
-		die(); //required for ajax call
+		echo $this->prepare_search_request($url, $search, $limit);
+		die();		
 	}
 
 } // class Wikipedia_Widget

@@ -3,7 +3,7 @@
 	Plugin Name: Wikipedia Widget
 	Description: Shows wikipedia search results depending on a given string or the current post title.
 	Author: Simeon Ackermann
-	Version: 0.13.04
+	Version: 0.13.05
 	Author URI: http://a-simeon.de
 	*/
 

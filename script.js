@@ -3,7 +3,7 @@ jQuery(document).ready(function($) {
 	var options = wikipedia_widget_script;
 	var ajaxurl = options['ajaxurl'];
 
-	jQuery.wikipedia_call = function(search_term) {		
+	$.wikipedia_call = function(search_term) {		
 		if (search_term == "") return;
 		var thisData = {
 				action: 'wikipedia_request',				
@@ -11,28 +11,28 @@ jQuery(document).ready(function($) {
 				url: options['wikipedia_url'],
 				limit: options['limit'],
 			};
-		jQuery.ajax({
+		$.ajax({
 		    url: ajaxurl,
 		    type: 'POST',
 		    data: thisData,
 		    beforeSend: function () {
-		    	jQuery(".wikipedia_widget-loader").css('display', 'inline');
+		    	$(".wikipedia_widget-loader").show("slow");
 		    },
 		    success: function (response) {
-		    	jQuery(".wikipedia_widget-loader").css('display', 'none');
+		    	$(".wikipedia_widget-loader").hide();
 		        if (response) {
-	 				jQuery(".wikipedia_widget-result").html( response );
+	 				$(".wikipedia_widget-result").html( response );
 	 			}
 		    }
 		});
 	}
 
-	jQuery('.wikipedia_widget-search_form').submit(function () {
+	$('.wikipedia_widget-search_form').submit(function () {
 		return false;
 	});	
 
-	if ( jQuery('.wikipedia_widget-default_search').length > 0) {
-		jQuery.wikipedia_call(jQuery.trim(jQuery('.wikipedia_widget-default_search').val()));
+	if ( $('.wikipedia_widget-default_search').length > 0) {
+		$.wikipedia_call($.trim($('.wikipedia_widget-default_search').val()));
 	}
 
 	var search_fields = Array('.wikipedia_widget-search');
@@ -41,15 +41,15 @@ jQuery(document).ready(function($) {
 		search_field_alt = search_field_alt.search(/^[^#|^.]/) != -1 ? '#' + search_field_alt : search_field_alt;
 		search_fields.push( search_field_alt );
 	}	
-	jQuery.each(search_fields, function(i, value) {
-		var search_term = Array();
-		jQuery(value).keyup(function() {
-			if ( search_term[i] != jQuery.trim(jQuery(value).val())) {
-				search_term[i] = jQuery.trim(jQuery(value).val());
-				jQuery(search_fields[0]).val( search_term[i] );
-				if ( search_term[i].length > 2 ) {
-					delay(function(){
-			    		jQuery.wikipedia_call(search_term[i]);
+	$.each(search_fields, function(i, value) {
+		var search_term = new Array(2);
+		$(value).keyup(function() {				
+			if ( search_term[i] != $.trim($(this).val())) {
+				search_term[i] = $.trim($(this).val());
+				$(search_fields[0]).val( search_term[i] );
+				if ( search_term[i].length > 2 ) {					
+					delay(function(){						
+			    		$.wikipedia_call(search_term[i]);
 			    	}, 500 );
 				}
 			}
@@ -64,6 +64,4 @@ jQuery(document).ready(function($) {
 			timer = setTimeout(callback, ms);
 		};
 	})();
-	
-
 });

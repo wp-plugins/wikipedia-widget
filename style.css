@@ -1,15 +1,14 @@
 .widget_wikipedia_widget form input[type=submit] {
 	display: none;
 }
-.widget_wikipedia_widget form input[type=text] {
-	width: 80%;
+.widget_wikipedia_widget form input[type=text] {	
 	margin-bottom: 15px;
 	float: left;
 }
 .widget_wikipedia_widget .wikipedia_widget-loader img {
 	border: 0px;
 	box-shadow: none;
-	float: left;
+	margin: 4px 0 0 -23px;
 }
 .wikipedia_widget-result {
 	clear: both;
